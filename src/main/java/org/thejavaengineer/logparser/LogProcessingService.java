@@ -15,6 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
+/**
+ * Service for processing log files.
+ * It watches a directory for new log files and processes them as they appear.
+ */
 @Service
 @RequiredArgsConstructor
 public class LogProcessingService {
@@ -26,6 +30,11 @@ public class LogProcessingService {
     private final Set<Integer> processedLines = new HashSet<>(); // HashSet for line hashes
     private static final String LOG_DIR = System.getenv("LOG_DIR") != null ? System.getenv("LOG_DIR") : "./logs";
 
+    /**
+     * Starts watching the log directory for changes.
+     *
+     * @throws IOException If an I/O error occurs.
+     */
     @PostConstruct
     public void startWatching() throws IOException {
         System.out.println("Starting log processing service. Monitoring directory: " + LOG_DIR);
@@ -65,6 +74,11 @@ public class LogProcessingService {
         }).start();
     }
 
+    /**
+     * Processes a single log file.
+     *
+     * @param filePath The path to the log file.
+     */
     private void processFile(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;

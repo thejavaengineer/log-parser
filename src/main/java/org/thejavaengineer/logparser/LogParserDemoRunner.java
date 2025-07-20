@@ -4,12 +4,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+/**
+ * A command-line runner that demonstrates the functionality of the LogParser.
+ */
 @Component
 @RequiredArgsConstructor
 public class LogParserDemoRunner implements CommandLineRunner {
 
     private final LogParser logParser;
 
+    /**
+     * Runs the demo.
+     *
+     * @param args Command line arguments.
+     */
     @Override
     public void run(String... args) {
         System.out.println("Log Parser Demo");

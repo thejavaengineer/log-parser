@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Service for tracking statistics about the parsed logs.
+ */
 @Service
 public class LogStatsService {
 
@@ -15,6 +18,11 @@ public class LogStatsService {
     private final AtomicInteger successCount = new AtomicInteger(0);
     private final AtomicInteger failureCount = new AtomicInteger(0);
 
+    /**
+     * Updates the statistics with the data from a parsed log.
+     *
+     * @param parsed The parsed log.
+     */
     public void updateStats(ParsedLog parsed) {
         if (!"unknown".equals(parsed.getLogFormat())) {
             successCount.incrementAndGet();
@@ -29,6 +37,11 @@ public class LogStatsService {
         }
     }
 
+    /**
+     * Returns a map of the current statistics.
+     *
+     * @return A map of the current statistics.
+     */
     public Map<String, Object> getStats() {
         Map<String, Object> stats = new ConcurrentHashMap<>();
         stats.put("successCount", successCount.get());

@@ -15,11 +15,21 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Service for parsing log lines.
+ * It can detect and parse different log formats like Apache, Nginx, JSON, and Syslog.
+ */
 @Service
 public class LogParser {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * Detects the format of a log line.
+     *
+     * @param logLine The log line to analyze.
+     * @return The detected format (e.g., "json", "apache", "nginx", "syslog", or "unknown").
+     */
     public String detectFormat(String logLine) {
         // JSON check
         try {
@@ -49,6 +59,13 @@ public class LogParser {
         return "unknown";
     }
 
+    /**
+     * Parses a log line into a ParsedLog object.
+     *
+     * @param logLine    The log line to parse.
+     * @param sourceFile The file from which the log line was read.
+     * @return A ParsedLog object containing the parsed data.
+     */
     public ParsedLog parse(String logLine, String sourceFile) {
         ParsedLog parsedLog = new ParsedLog();
         parsedLog.setRawLog(logLine);
@@ -71,6 +88,12 @@ public class LogParser {
         return parsedLog;
     }
 
+    /**
+     * Parses an Apache log line.
+     *
+     * @param logLine   The log line to parse.
+     * @param parsedLog The ParsedLog object to populate.
+     */
     private void parseApache(String logLine, ParsedLog parsedLog) {
         Pattern pattern = Pattern.compile("(\\S+) - - \\[(\\d+/\\w+/\\d+):(\\d+:\\d+:\\d+) ([+-]\\d+)\\] \"(\\S+) (\\S+) ([^\"]+)\" (\\d+) (\\d+|-)");
         Matcher matcher = pattern.matcher(logLine);
@@ -87,6 +110,12 @@ public class LogParser {
         }
     }
 
+    /**
+     * Parses an Nginx log line.
+     *
+     * @param logLine   The log line to parse.
+     * @param parsedLog The ParsedLog object to populate.
+     */
     private void parseNginx(String logLine, ParsedLog parsedLog) {
         Pattern pattern = Pattern.compile("(\\S+) - (\\S+) \\[(\\d+/\\w+/\\d+):(\\d+:\\d+:\\d+) ([+-]\\d+)\\] \"(\\S+) (\\S+) ([^\"]+)\" (\\d+) (\\d+) \"([^\"]*)\" \"([^\"]*)\"");
         Matcher matcher = pattern.matcher(logLine);
@@ -109,6 +138,13 @@ public class LogParser {
         }
     }
 
+    /**
+     * Parses a JSON log line.
+     *
+     * @param logLine   The log line to parse.
+     * @param parsedLog The ParsedLog object to populate.
+     * @throws JsonProcessingException If there is an error parsing the JSON.
+     */
     private void parseJson(String logLine, ParsedLog parsedLog) throws JsonProcessingException {
         JsonNode json = objectMapper.readTree(logLine);
         parsedLog.setTimestamp(json.path("timestamp").asText());
@@ -118,6 +154,12 @@ public class LogParser {
         parsedLog.setAdditionalFields(toJson(extras));
     }
 
+    /**
+     * Parses a Syslog log line.
+     *
+     * @param logLine   The log line to parse.
+     * @param parsedLog The ParsedLog object to populate.
+     */
     private void parseSyslog(String logLine, ParsedLog parsedLog) {
         // Basic Syslog parser: <priority>version timestamp hostname app-name procid msgid [structured-data] message
         Pattern pattern = Pattern.compile("^<(\\d+)>\\d+ (\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}[^ ]*) (\\S+) (\\S+) (\\S+) (\\S+) \\[([^]]*)\\] (.*)");
@@ -136,6 +178,14 @@ public class LogParser {
         }
     }
 
+    /**
+     * Converts a date, time, and timezone into an ISO 8601 formatted string.
+     *
+     * @param date The date string.
+     * @param time The time string.
+     * @param tz   The timezone string.
+     * @return The ISO 8601 formatted date-time string.
+     */
     private String convertToIso(String date, String time, String tz) {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z");
@@ -146,6 +196,12 @@ public class LogParser {
         }
     }
 
+    /**
+     * Converts a map to a JSON string.
+     *
+     * @param map The map to convert.
+     * @return The JSON string representation of the map.
+     */
     private String toJson(Map<String, Object> map) {
         try {
             return objectMapper.writeValueAsString(map);
